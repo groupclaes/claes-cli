@@ -93,10 +93,12 @@ function validateAllTasks(tasks) {
 }
 
 function validateTask(task) {
-  const now = new Date(new Date().getTime())
-  let lastRun = new Date() // last time the schedule has started
+  const now = stringToDateDate()
+  // last time the schedule has started
+  let lastRun = new Date()
+
   if (task.LastRun !== undefined && task.LastRun !== null) {
-    lastRun = new Date(new Date(task.LastRun).getTime())
+    lastRun = stringToDateDate(task.LastRun)
   }
 
   switch (task.Status) {
@@ -114,7 +116,7 @@ function validateTask(task) {
       return 'ok' // otherwise the task is probably doing fine.
 
     case 2: // task is ok
-      const firstRun = calculateTaskTime(task.StartTime)
+      const firstRun = calculateTaskTime(now, task.StartTime)
 
       if (task.LastRun) {
         let currentSchedule = new Date(firstRun)
@@ -144,7 +146,7 @@ function validateTask(task) {
         } else if (now > currentSchedule) {
           let endRun = new Date()
           if (task.EndTime != null) {
-            endRun = calculateTaskTime(task.EndTime)
+            endRun = calculateTaskTime(now, task.EndTime)
           }
           // console.log(`'task' ${task.Id}, 'currentSchedule', ${currentSchedule}, 'now', ${now}, 'firstRun', ${firstRun}, 'lastRun', ${lastRun}, 'endtime', ${endRun}`)
 
@@ -185,13 +187,47 @@ function validateTask(task) {
   }
 }
 
-function calculateTaskTime(time) {
+/**
+ * calculate task time from nowtime and time of the task
+ * @param {DateTime} now
+ * @param {number} time
+ * @returns {Date} Today + Time Correction + Task time
+ */
+function calculateTaskTime(now, time) {
   return new Date(new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() + time * 60000)
 }
 
+/**
+ * Update the status for Task with id: {id}
+ * @param {number} id Task id
+ * @param {string} status New Task status
+ * @returns
+ */
 function setTaskStatus(id, status) {
   return axios.get(`https://api.groupclaes.be/tasks/${id}/status?status=${status}`, { headers: { Accept: 'application/json' } })
 }
+
+/**
+ * return Time in Miliseconds for Date? if present otherwise time now
+ * @param {string | undefined} date
+ * @returns {number}
+ */
+function stringToDateTime(date) {
+  if (date) {
+    return new Date(date).getTime()
+  }
+  return new Date().getTime()
+}
+
+/**
+ * Return Date Object from number
+ * @param {number} date
+ * @returns {Date} result
+ */
+function stringToDateDate(date) {
+  return new Date(stringToDateTime(date))
+}
+
 /**
  * Class definition for task
  * @class Task
