@@ -63,6 +63,10 @@ function findJoke(query) {
     })
 }
 
+/**
+ * Validate all tasks in Task Array
+ * @param {Task[]} tasks
+ */
 function validateAllTasks(tasks) {
   tasks.forEach(async function (task) {
     const result = validateTask(task)
@@ -73,25 +77,12 @@ function validateAllTasks(tasks) {
         break
 
       case 'failed':
-        // set task to 4 since alert will be send
-        // await api.setTaskStatus(task.Id, '4')
-        console.warn(`${task.TaskName} has entered the failed state!\n${task.Responsible} please take action!`)
-        break
-
       case 'err: overtime':
-        console.warn(`${task.TaskName} is still running!\n${task.Responsible} please take action!`)
-        break
-
       case 'err: task-not-started':
-        console.warn(`${task.TaskName} has not started!\n${task.Responsible} please take action!`)
-        break
-
       case 'err: status-unknow':
-        console.warn(`${task.TaskName} is in an unknown state!\n${task.Responsible} please take action!`)
-        break
-
-      case 'err: confused':
-        console.warn(`Homer is confused??`)
+        // set task to 4 since alert will be send
+        await setTaskStatus(task.Id, '4')
+        console.warn(`${task.TaskName} has state: ${result.substring(4)}!\n${task.Responsible} please take action!`)
         break
 
       default:
@@ -196,4 +187,110 @@ function validateTask(task) {
 
 function calculateTaskTime(time) {
   return new Date(new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() + time * 60000)
+}
+
+function setTaskStatus(id, status) {
+  return axios.get(`https://api.groupclaes.be/tasks/${id}/status?status=${status}`, { headers: { Accept: 'application/json' } })
+}
+/**
+ * Class definition for task
+ * @class Task
+ */
+class Task {
+  /**
+   * Id of the task
+   * @type {number}
+   * @memberof Task
+   */
+  Id
+
+  /**
+   * The name of the task
+   * @type {string}
+   * @memberof Task
+   */
+  TaskName
+
+  /**
+   * The FQND or Hostname of the Server hosting the task
+   * @type {string}
+   * @memberof Task
+   */
+  Server
+
+  /**
+   * The start time of the task in minutes since midnight
+   * @type {number}
+   * @memberof Task
+   */
+  StartTime
+
+  /**
+   * The end time of the task in minutes since midnight 
+   * @type {number | undefined}
+   * @memberof Task
+   */
+  EndTime
+
+  /**
+   * The interval in minutes in which the task will be repeated
+   * @type {number}
+   * @memberof Task
+   */
+  Interval
+
+  /**
+   * True indicates the task also runs in the weekend
+   * @type {boolean}
+   * @memberof Task
+   */
+  Weekend
+
+  /**
+   * The normal duration in minutes of the task
+   * @type {number}
+   * @memberof Task
+   */
+  NormalDuration
+
+  /**
+   * Discord ID of persons responible for this task
+   * @type {string}
+   * @memberof Task
+   */
+  Responsible
+
+  /**
+   * Status of the task
+   * -1 = DISABLED
+   * 0 = NEW
+   * 1 = RUNNING
+   * 2 = OK
+   * 3 = FAILED
+   * 4 = FAILED NOTIF SEND
+   * @type {-1 | 0 | 1 | 2 | 3 | 4}
+   * @memberof Task
+   */
+  Status
+
+  /**
+   * Last time the task has been executed
+   * @type {Date | undefined}
+   * @memberof Task
+   */
+  LastRun
+
+  /**
+   * Last time the task has completed execution sucessfully
+   * @type {Date | undefined}
+   * @memberof Task
+   */
+  LastSuccess
+
+  /**
+   * Command the task has executed
+   * @type {string}
+   * @memberof Task
+   */
+  Command
 }
