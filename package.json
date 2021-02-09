@@ -4,7 +4,7 @@
   "description": "Group Claes CLI",
   "main": "bin/index.js",
   "scripts": {
-    "test": "claes-cli --version"
+    "test": "npm i -g ./ && claes-cli --version"
   },
   "keywords": [
     "claes",
