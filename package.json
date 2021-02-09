@@ -22,8 +22,8 @@
   "devDependencies": {},
   "dependencies": {
     "axios": "^0.21.1",
-    "boxen": "^4.2.0",
-    "chalk": "^2.4.2",
-    "yargs": "^13.3.2"
+    "boxen": "^5.0.0",
+    "chalk": "^4.1.0",
+    "yargs": "^16.2.0"
   }
 }
