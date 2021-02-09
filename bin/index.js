@@ -159,14 +159,13 @@ function evaluateTaskOkState(lastRun, task) {
 
     if (weekend || once || runFirst) { }
     else if (now > currentSchedule) {
-      let endRun = new Date()
+      let endRun = (task.EndTime != null) ? calculateTaskTime(now, task.EndTime) : new Date()
 
-      if (task.EndTime != null) {
-        endRun = calculateTaskTime(now, task.EndTime)
-      }
-
+      const onSchedule = lastRun >= currentSchedule
+      const onCurrentSchedule = task.EndTime != null && currentSchedule > endRun
+      const onStartedSchedule = now <= new Date(currentSchedule.getTime() + 60000)
       // check if the schedule started as planned
-      if ((lastRun >= currentSchedule) || (task.EndTime != null && currentSchedule > endRun) || (now <= new Date(currentSchedule.getTime() + 60000))) { }
+      if (onSchedule || onCurrentSchedule || onStartedSchedule) { }
       else {
         result = 'err: task-not-started'
       }
