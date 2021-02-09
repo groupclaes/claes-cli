@@ -145,37 +145,32 @@ function evaluateTaskRunningState(lastRun, task) {
 }
 
 function evaluateTaskOkState(lastRun, task) {
-  const now = stringToDateDate()
   let result = 'ok'
+
+  const now = stringToDateDate()
   const firstRun = calculateTaskTime(now, task.StartTime)
 
   if (task.LastRun) {
-    let currentSchedule = new Date(firstRun)
+    let currentSchedule = firstRun
 
     // check if the task has an interval, if so calculate the currently planned start time
     if (task.Interval > 0) {
-      // task has an interval => find current interval
-      let myDate = new Date(currentSchedule.getTime() + (task.Interval * 60000))
-
-      while (myDate <= now) {
-        currentSchedule = myDate
-        myDate = new Date(currentSchedule.getTime() + (task.Interval * 60000))
-      }
+      currentSchedule = calculateTaskTimeFromInterval(now, firstRun, task.Interval)
     }
-
 
     if (!task.Weekend && (now.getDay() == 0 || now.getDay() == 6)) {
       // if task should not run in weekend and today is weekend, return true.
-      console.log(`task ${task.Id}, 'if task should not run in weekend and today is weekend, return true.'`)
+      // console.log(`task ${task.Id}, 'if task should not run in weekend and today is weekend, return true.'`)
       // offset by one minute to check single run
     } else if (lastRun && new Date(lastRun.getTime() + 60000) > firstRun && task.Interval == 0) {
       // task only runs once and is on schedule
-      console.log(`task ${task.Id}, 'task only runs once and is on schedule, timing ok.'`)
+      // console.log(`task ${task.Id}, 'task only runs once and is on schedule, timing ok.'`)
     } else if (now < firstRun) {
       // do nothing since the schedule is not suposed to run before this.
-      console.log(`task ${task.Id}, 'do nothing since the schedule is not suposed to run before this.'`)
+      // console.log(`task ${task.Id}, 'do nothing since the schedule is not suposed to run before this.'`)
     } else if (now > currentSchedule) {
       let endRun = new Date()
+
       if (task.EndTime != null) {
         endRun = calculateTaskTime(now, task.EndTime)
       }
@@ -183,23 +178,17 @@ function evaluateTaskOkState(lastRun, task) {
       // check if the schedule started as planned
       if (lastRun >= currentSchedule) {
         // schedule has started as planned.
-        // console.log(`'task' ${task.Id}, 'schedule has started as planned.'`)
-        result = 'ok'
+        // console.log(`task ${task.Id}, 'schedule has started as planned.'`)
       } else if (task.EndTime != null && currentSchedule > endRun) {
         // endtime is defined and shedule is after endtime => ignore
-        // console.log(`'task' ${task.Id}, 'endtime is defined and shedule is after endtime => ignore.'`)
-        result = 'ok'
+        // console.log(`task ${task.Id}, 'endtime is defined and shedule is after endtime => ignore.'`)
       } else if (now <= new Date(currentSchedule.getTime() + 60000)) {
         // schedule has 1 minute to start as planned.
-        // console.log(`'task' ${task.Id}, 'schedule has 1 minute to start as planned.'`)
-        result = 'ok'
+        // console.log(`task ${task.Id}, 'schedule has 1 minute to start as planned.'`)
       } else {
         // return 'ok';
         result = 'err: task-not-started'
       }
-    } else {
-      console.log(`'task' ${task.Id}, 'I have no fucking clue'`)
-      result = 'ok'
     }
   } else {
     // task has never run but status is set, call in for I am comfusion
@@ -214,6 +203,18 @@ function evaluateTaskFailedState() {
 
 function evaluateTaskFailedNotifSendState() {
   return 'ok'
+}
+
+function calculateTaskTimeFromInterval(now, date, interval) {
+  // task has an interval => find current interval
+  let myDate = new Date(date.getTime() + (interval * 60000))
+
+  while (myDate <= now) {
+    date = myDate
+    myDate = new Date(date.getTime() + (interval * 60000))
+  }
+
+  return date
 }
 
 /**
