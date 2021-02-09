@@ -153,20 +153,18 @@ function evaluateTaskOkState(lastRun, task) {
   if (task.LastRun) {
     const currentSchedule = (task.Interval > 0) ? calculateTaskTimeFromInterval(now, firstRun, task.Interval) : firstRun
 
-    const weekend = !task.Weekend && (now.getDay() == 0 || now.getDay() == 6)
+    const isWeekend = !task.Weekend && (now.getDay() === 0 || now.getDay() === 6)
     const once = lastRun && new Date(lastRun.getTime() + 60000) > firstRun && task.Interval == 0
     const runFirst = now < firstRun
 
-    if (weekend || once || runFirst) { }
-    else if (now > currentSchedule) {
+    if (now > currentSchedule && !(isWeekend || once || runFirst)) {
       let endRun = (task.EndTime != null) ? calculateTaskTime(now, task.EndTime) : new Date()
 
       const onSchedule = lastRun >= currentSchedule
       const onCurrentSchedule = task.EndTime != null && currentSchedule > endRun
       const onStartedSchedule = now <= new Date(currentSchedule.getTime() + 60000)
       // check if the schedule started as planned
-      if (onSchedule || onCurrentSchedule || onStartedSchedule) { }
-      else {
+      if (!onSchedule && !onCurrentSchedule && !onStartedSchedule) {
         result = 'err: task-not-started'
       }
     }
