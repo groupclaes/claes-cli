@@ -31,14 +31,9 @@ if (options.search) {
   findJoke(options.search)
 }
 
-console.log(options)
-
 if (options.checkTaskStatus === '') {
-  console.log('looking for tasks')
   axios.get(`https://api.groupclaes.be/tasks`, { headers: { Accept: 'application/json' } })
     .then(function (res) {
-      console.log(res)
-
       validateAllTasks(res.data)
     })
     .catch(function (err) {
@@ -128,7 +123,7 @@ function validateTask(task) {
       return 'ok' // otherwise the task is probably doing fine.
 
     case 2: // task is ok
-      const firstRun = new Date(new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() + task.StartTime * 60000)
+      const firstRun = calculateTaskTime(task.StartTime)
 
       if (task.LastRun) {
         let currentSchedule = new Date(firstRun)
@@ -158,7 +153,7 @@ function validateTask(task) {
         } else if (now > currentSchedule) {
           let endRun = new Date()
           if (task.EndTime != null) {
-            endRun = new Date(new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() + task.EndTime * 60000)
+            endRun = calculateTaskTime(task.EndTime)
           }
           // console.log(`'task' ${task.Id}, 'currentSchedule', ${currentSchedule}, 'now', ${now}, 'firstRun', ${firstRun}, 'lastRun', ${lastRun}, 'endtime', ${endRun}`)
 
@@ -197,4 +192,8 @@ function validateTask(task) {
     default:
       return 'err: status-unknow'
   }
+}
+
+function calculateTaskTime(time) {
+  return new Date(new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() + time * 60000)
 }
