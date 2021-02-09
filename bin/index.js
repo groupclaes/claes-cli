@@ -154,7 +154,7 @@ function evaluateTaskOkState(lastRun, task) {
     const currentSchedule = (task.Interval > 0) ? calculateTaskTimeFromInterval(now, firstRun, task.Interval) : firstRun
 
     const isWeekend = !task.Weekend && (now.getDay() === 0 || now.getDay() === 6)
-    const once = lastRun && new Date(lastRun.getTime() + 60000) > firstRun && task.Interval == 0
+    const once = new Date(lastRun.getTime() + 60000) > firstRun && task.Interval == 0
     const runFirst = now < firstRun
 
     if (now > currentSchedule && !(isWeekend || once || runFirst)) {
